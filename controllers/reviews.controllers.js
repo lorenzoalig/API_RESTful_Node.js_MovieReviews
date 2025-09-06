@@ -21,7 +21,7 @@ const createReview = async (req, res) => {
         const { id } = req.params;
         let movie = await Movie.findById(id);
         
-        if(!movie) return res.status(400).json({message: 'Movie not found'});
+        if(!movie) return res.status(404).json({message: 'Movie not found'});
         movie.reviews.push(req.body);
         await movie.save();
         movie = await Movie.findById(id);
@@ -34,9 +34,52 @@ const createReview = async (req, res) => {
     }
 }
 
+const updateReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        let movie = await Movie.findById(id);
+
+        if(!movie) return res.status(404).json({message: 'Movie not found'});
+        const movieReview = movie.reviews.id(req.body._id);
+
+        if(!movieReview) return res.status(404).json({message: 'Review not found'});
+        const reviewIndex = movie.reviews.indexOf(movieReview);
+        movie.reviews[reviewIndex] = req.body;
+        movie = await movie.save();
+        res.status(200).json(movie.reviews[reviewIndex]);
+    } catch (error) {
+         if (error.name === "ValidationError") {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({message: error.message});
+    }
+}
+
+const deleteReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        let movie = await Movie.findById(id);
+
+        if(!movie) return res.status(404).json({message: 'Movie not found'});
+        const reviewIndex = movie.reviews.findIndex(r => r._id.equals(req.body._id));
+
+        if(reviewIndex < 0) return res.status(404).json({message: 'Review not found'});
+        movie.reviews[reviewIndex].remove();
+        movie = await movie.save();
+        res.status(200).json({message: 'Review deleted successfully'});
+    } catch (error) {
+        if (error.name === "ValidationError") {
+            return res.status(400).json({message: error.message});
+        }
+        res.status(500).json({message: error.message});
+    }
+}
+
 module.exports = {
     getReviews,
-    createReview
+    createReview,
+    updateReview,
+    deleteReview
 };
 
 
