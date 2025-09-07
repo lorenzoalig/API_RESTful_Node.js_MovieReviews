@@ -1,1 +1,1 @@
-In this project, I developed an API for a backend server of a a movie review app. It uses Node.js with Express framework, and it is developed in JavaScript.
+In this project, I developed an API for a backend server of a a movie review app. It uses Node.js with Mongoose and Express framework, and it is developed in JavaScript. It uses a database hosted in MongoDB's Atlas.
