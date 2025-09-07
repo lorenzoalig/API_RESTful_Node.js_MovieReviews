@@ -14,8 +14,13 @@ const getMovie = async (req, res) => {
     try {
         const { id } = req.params;
         const movie = await Movie.findById(id);
+
+        if(!movie) return res.status(404).json({message: 'Movie not found'});
         res.status(200).json(movie);
     } catch (error) {
+        if(error.name === 'CastError') {
+            return res.status(404).json({message: 'Invalid ID'});
+        }
         res.status(500).json({message: error.message});
     }
 };
@@ -25,6 +30,9 @@ const createMovie = async (req, res) => {
         const movie = await Movie.create(req.body);
         res.status(200).json(movie);
     } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({message: error.message})
     }
 };
@@ -32,15 +40,21 @@ const createMovie = async (req, res) => {
 const updateMovie = async (req, res) => {
     try {
         const { id } = req.params;
-        const movie = await Movie.findByIdAndUpdate(id, req.body);
+        const movie = await Movie.findById(id);
 
         if(!movie) {
                 return res.status(404).json({message: 'Movie not found'});
         }
-
-        const updatedMovie = await Movie.findById(id);
-        res.status(200).json(updatedMovie);
+        movie.overwrite(req.body);
+        await movie.save();
+        res.status(200).json(movie);
     } catch (error) {
+        if(error.name === 'CastError') {
+            return res.status(404).json({message: 'Invalid ID'});
+        }
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({message: error.message});
     }
 };
@@ -55,11 +69,14 @@ const deleteMovie = async (req, res) => {
         }
         res.status(200).json({message: 'Movie deleted succesfully'});
     } catch (error) {
+        if(error.name === 'CastError') {
+            return res.status(404).json({message: 'Invalid ID'});
+        }
         res.status(500).json({message: error.message});
     }
 };
 
-
+// Exports controllers
 module.exports = {
     getMovies,
     getMovie,

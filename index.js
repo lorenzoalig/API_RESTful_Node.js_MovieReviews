@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const movieRoute = require('./routes/movie.route.js');
+const moviesRoute = require('./routes/movie.route.js');
+const reviewsRoute = require('./routes/review.route.js')
 const app = express();
 dotenv.config();
 
@@ -14,7 +15,8 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 // Routes
-app.use("/api/movies", movieRoute);
+app.use("/api/movies", moviesRoute);
+app.use('/api/movies/reviews', reviewsRoute);
 
 
 // Connection to the database
